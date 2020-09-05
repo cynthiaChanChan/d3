@@ -24,7 +24,7 @@ const g = svg
 //Scales
 const xScale = d3.scaleLog().base(10).domain([142, 150000]).range([0, width]);
 const yScale = d3.scaleLinear().domain([0, 90]).range([height, 0]);
-const radius = d3.scaleSqrt().domain([2000, 1400000000]).range([5, 60]);
+const radius = d3.scaleSqrt().domain([0, 1400000000]).range([0, 30]);
 const contientColor = d3.scaleOrdinal(d3.schemePastel1);
 
 //Axes
@@ -80,15 +80,11 @@ const update = (dataset) => {
     circles
         .enter()
         .append("circle")
-        .attr("cx", (d) => xScale(d.income))
-        .attr("cy", (d) => yScale(d.life_exp))
         .attr("fill", (d) => contientColor(d.continent))
-        .attr("r", (d) => radius(d.population))
         .merge(circles)
         .transition(t)
         .attr("cx", (d) => xScale(d.income))
         .attr("cy", (d) => yScale(d.life_exp))
-        .attr("fill", (d) => contientColor(d.continent))
         .attr("r", (d) => radius(d.population));
 
     //update the time label
@@ -98,28 +94,22 @@ const update = (dataset) => {
 d3.json("./data/data.json")
     .then((data) => {
         //Filter data
-        const filteredData = data.map((item) => {
-            const filtered = item.countries
-                .filter((country) => {
-                    return country.income && country.life_exp;
-                })
-                .map((country) => {
+        data.forEach((item) => {
+            item.countries = item.countries.filter((country) => {
+                if (country.income && country.life_exp) {
                     country.income = +country.income;
                     country.life_exp = +country.life_exp;
                     country.population = +country.population;
                     return country;
-                });
-            return {
-                countries: filtered,
-                year: item.year,
-            };
+                }
+            });
         });
         d3.interval(() => {
             timeIndex = timeIndex >= data.length - 1 ? 0 : timeIndex + 1;
-            update(filteredData[timeIndex]);
+            update(data[timeIndex]);
         }, 100);
 
-        update(filteredData[0]);
+        update(data[0]);
     })
     .catch((e) => {
         console.error(e.message);
