@@ -9,6 +9,30 @@
                 stroke: #333;
                 stroke-opacity: 0.7;
             }
+
+            body {
+                padding: 0;
+                margin: 0;
+            }
+
+            #chart-area {
+                position: relative;
+                margin: 100px 0 0 100px;
+            }
+
+            div.tooltip {
+                position: absolute;
+                padding: 10px;
+                font: 12px sans-serif;
+                background: #fff;
+                border: 1px solid #333;
+                border-radius: 8px;
+                pointer-events: none;
+            }
+
+            div.tooltip span {
+                text-transform: capitalize;
+            }
         </style>
     </head>
 

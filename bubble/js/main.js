@@ -8,6 +8,8 @@ const margin = {
 const width = 800 - margin.right - margin.left;
 const height = 500 - margin.top - margin.bottom;
 
+const continents = ["africa", "americas", "europe", "asia"];
+
 //Time index
 let timeIndex = 0;
 
@@ -20,6 +22,13 @@ const svg = d3
 const g = svg
     .append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+// Define the div for the tooltip
+const tooltip = d3
+    .select("#chart-area")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
 //Scales
 const xScale = d3.scaleLog().base(10).domain([142, 150000]).range([0, width]);
@@ -39,6 +48,30 @@ g.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(xAxisCall);
 g.append("g").attr("class", "y-axis").call(yAxisCall);
+
+// Legend
+const legendGroup = g
+    .append("g")
+    .attr("transform", `translate(${width - 10}, ${height - 125})`);
+
+continents.forEach((continent, i) => {
+    const legendRow = legendGroup
+        .append("g")
+        .attr("transform", `translate(0, ${i * 20})`);
+
+    legendRow
+        .append("rect")
+        .attr("height", 10)
+        .attr("width", 10)
+        .attr("fill", contientColor(continent));
+    legendRow
+        .append("text")
+        .text(continent)
+        .style("text-transform", "capitalize")
+        .attr("text-anchor", "end")
+        .attr("x", -10)
+        .attr("y", 10);
+});
 
 //Labels
 g.append("text")
@@ -67,6 +100,31 @@ const timeLabel = g
     .attr("y", height - 10)
     .attr("text-anchor", "end");
 
+tooltip.addContent = (d) => {
+    return `<span>Country: ${d.country}</span><br>
+    <span>Continent: ${d.continent}</span><br>
+    <span>Life Expectancy: ${d3.format(".2f")(d.life_exp)}</span><br>
+    <span>GDP Per Capita: ${d3.format("$,.0f")(d.income)}</span><br>
+    <span>Population: ${d3.format(",.0f")(d.population)}</span>`;
+};
+
+tooltip.show = function () {
+    const elem = d3.select(this);
+    tooltip
+        .transition()
+        .duration(100)
+        .style("opacity", 0.9)
+        .style("left", +elem.attr("cx") + margin.left + "px")
+        .style("top", +elem.attr("cy") + margin.top + "px");
+    tooltip
+        .html(tooltip.addContent.apply(this, arguments))
+        .style("transform", "translate(-50%, -100%)");
+};
+
+tooltip.hide = () => {
+    tooltip.transition().duration(100).style("opacity", 0);
+};
+
 const update = (dataset) => {
     const { countries, year } = dataset;
     //Standard transition time
@@ -81,6 +139,8 @@ const update = (dataset) => {
         .enter()
         .append("circle")
         .attr("fill", (d) => contientColor(d.continent))
+        .on("mouseover", tooltip.show)
+        .on("mouseout", tooltip.hide)
         .merge(circles)
         .transition(t)
         .attr("cx", (d) => xScale(d.income))
