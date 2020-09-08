@@ -12,6 +12,12 @@ const continents = ["africa", "americas", "europe", "asia"];
 
 //Time index
 let timeIndex = 0;
+let interval = null;
+let allData = null;
+let newData = null;
+let startYear = 1950;
+const dateSlider = $("#date-slider");
+const yearElem = $("#year");
 
 const svg = d3
     .select("#chart-area")
@@ -125,8 +131,8 @@ tooltip.hide = () => {
     tooltip.transition().duration(100).style("opacity", 0);
 };
 
-const update = (dataset) => {
-    const { countries, year } = dataset;
+const update = () => {
+    const { countries, year } = newData[timeIndex];
     //Standard transition time
     const t = d3.transition().duration(100);
     //Join new data with old elements.
@@ -149,6 +155,59 @@ const update = (dataset) => {
 
     //update the time label
     timeLabel.text(year);
+    yearElem.text(timeIndex + startYear);
+    dateSlider.slider("value", timeIndex + startYear);
+};
+
+const step = () => {
+    timeIndex = timeIndex >= newData.length - 1 ? 0 : timeIndex + 1;
+    update();
+};
+
+document.getElementById("play-button").addEventListener("click", function () {
+    if (this.textContent.trim() === "Pause") {
+        clearInterval(interval);
+        this.textContent = "Play";
+    } else {
+        interval = setInterval(() => {
+            step();
+        }, 100);
+        this.textContent = "Pause";
+    }
+});
+
+document.getElementById("reset-button").addEventListener("click", () => {
+    timeIndex = 0;
+    update();
+});
+
+document
+    .getElementById("continent-select")
+    .addEventListener("change", function () {
+        if (this.value === "all") {
+            newData = [...allData];
+        } else {
+            newData = allData.map((item) => {
+                const countries = item.countries.filter((country) => {
+                    return this.value === country.continent;
+                });
+                return { countries: countries, year: item.year };
+            });
+        }
+        update();
+    });
+
+const setSlider = (newData) => {
+    dateSlider.slider({
+        min: startYear,
+        max: startYear + newData.length - 1,
+        step: 1,
+        range: false,
+        slide: (event, ui) => {
+            timeIndex = ui.value - startYear;
+            update();
+        },
+    });
 };
 
 d3.json("./data/data.json")
@@ -164,12 +223,17 @@ d3.json("./data/data.json")
                 }
             });
         });
-        d3.interval(() => {
-            timeIndex = timeIndex >= data.length - 1 ? 0 : timeIndex + 1;
-            update(data[timeIndex]);
-        }, 100);
 
-        update(data[0]);
+        allData = data;
+        newData = [...data];
+
+        setSlider(newData);
+
+        update();
+
+        interval = setInterval(() => {
+            step();
+        }, 100);
     })
     .catch((e) => {
         console.error(e.message);

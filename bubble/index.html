@@ -4,6 +4,8 @@
         <meta charset="utf-8" />
         <meta name="description" content="" />
         <title>Income and Life Expectancy</title>
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/jquery-ui.min.css" />
         <style>
             circle {
                 stroke: #333;
@@ -11,13 +13,13 @@
             }
 
             body {
-                padding: 0;
+                padding-top: 50px;
                 margin: 0;
             }
 
             #chart-area {
                 position: relative;
-                margin: 100px 0 0 100px;
+                margin-top: 100px;
             }
 
             div.tooltip {
@@ -33,12 +35,61 @@
             div.tooltip span {
                 text-transform: capitalize;
             }
+
+            .form-control {
+                width: 150px;
+                margin: 10px;
+            }
+
+            .buttons {
+                display: flex;
+                align-items: center;
+            }
+
+            button {
+                margin: 10px;
+            }
+
+            #slider-div {
+                width: 250px;
+                margin: 10px;
+            }
         </style>
     </head>
 
     <body>
-        <div id="chart-area"></div>
-
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 buttons">
+                    <button id="play-button" class="btn btn-primary">
+                        Pause
+                    </button>
+                    <button id="reset-button" class="btn btn-secondary">
+                        Reset
+                    </button>
+                    <div id="slider-div">
+                        <label>Year: <span id="year">1800</span></label>
+                        <div id="date-slider"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <select id="continent-select" class="form-control">
+                        <option selected value="all">All</option>
+                        <option value="africa">Africa</option>
+                        <option value="americas">Americas</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia">Asia</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="chart-area"></div>
+                </div>
+            </div>
+        </div>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
         <!-- External JS libraries -->
         <script src="js/d3.min.js"></script>
         <!-- Custom JS -->
