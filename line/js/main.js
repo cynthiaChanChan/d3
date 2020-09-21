@@ -114,7 +114,7 @@ d3.json("./data/example.json")
             const i = bisectDate(data, x0, 1);
             const d0 = data[i - 1];
             const d1 = data[i];
-            const d = x0 - d0 > d1 - x0 ? d1 : d0;
+            const d = x0 - d0.year > d1.year - x0 ? d1 : d0;
 
             focus.attr("transform", `translate(${x(d.year)}, ${y(d.value)})`);
             focus.select("text").text(d.value);
